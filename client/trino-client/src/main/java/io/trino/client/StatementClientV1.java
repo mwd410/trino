@@ -367,7 +367,7 @@ class StatementClientV1
                         Thread.currentThread().interrupt();
                     }
                     state.compareAndSet(State.RUNNING, State.CLIENT_ERROR);
-                    throw new RuntimeException("StatementClient thread was interrupted");
+                    throw new RuntimeException("StatementClient thread was interrupted", e);
                 }
             }
             attempts++;
