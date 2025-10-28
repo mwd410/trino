@@ -312,6 +312,7 @@ public class PlanTester
     private final JoinCompiler joinCompiler;
     private final FlatHashStrategyCompiler hashStrategyCompiler;
     private final CatalogFactory catalogFactory;
+    private final TestingCatalogFailureHandler catalogFailureHandler;
     private final CoordinatorDynamicCatalogManager catalogManager;
     private final PluginManager pluginManager;
     private final ExchangeManagerRegistry exchangeManagerRegistry;
@@ -351,7 +352,8 @@ public class PlanTester
         this.optimizerConfig = new OptimizerConfig();
         LazyCatalogFactory catalogFactory = new LazyCatalogFactory();
         this.catalogFactory = catalogFactory;
-        this.catalogManager = new CoordinatorDynamicCatalogManager(new InMemoryCatalogStore(), catalogFactory, directExecutor());
+        this.catalogFailureHandler = new TestingCatalogFailureHandler();
+        this.catalogManager = new CoordinatorDynamicCatalogManager(new InMemoryCatalogStore(), catalogFactory, Optional.of(catalogFailureHandler), directExecutor());
         this.transactionManager = InMemoryTransactionManager.create(
                 new TransactionManagerConfig().setIdleTimeout(new Duration(1, TimeUnit.DAYS)),
                 yieldExecutor,
@@ -654,6 +656,11 @@ public class PlanTester
     public void createCatalog(String catalogName, String connectorName, Map<String, String> properties)
     {
         catalogManager.createCatalog(new CatalogName(catalogName), new ConnectorName(connectorName), properties, false);
+    }
+
+    public TestingCatalogFailureHandler getCatalogFailureHandler()
+    {
+        return catalogFailureHandler;
     }
 
     public CatalogManager getCatalogManager()
